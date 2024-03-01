@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>VScript (Video Script)</title>
+        <style>
+            #code {
+                border: 5px blue inset;
+                resize: none;
+            }
+        </style>
+    </head>
+    <body>
+        <h4>VScript reference:</h4>
+        <ul>
+            <li>"%" is for starting JS code (for embedding JavaScript) and "$" is for ending it.</li>
+            <li>You should start all VScript code with a "connect" statement</li>
+            <li>Strings and numbers should have a "&" symbol following them. (They don't have to in JavaScript embedded code)</li>
+            <li>Instead of a semicolon, there is a sharp symbol</li>
+        </ul>
+        <p>VScript Editor &downarrow;</p>
+        <textarea id="code" cols="40" rows="10">connect 0&#
+var i = 9&#
+ex i += 8&#
+VPort i + ' Hi users'&#
+%
+/*'.psign.', '.dsign.', '.scolin.', and '.sharp.'
+are special characters.
+Used in VML as a scripting language.
+.psign. and .dsign. are for embedding JavaScript*/
+$</textarea>
+        <button onclick="run()">Run Code</button>
+        <script id="serverside">
+        </script>
+        <script>
+            function run() {
+                var code = document.getElementById("code").value;
+                var jsList = [];
+                var expressions = [];
+                var operations = [];
+                var operation = "";
+                var expression = "";
+                var script = "";
+                var Vport = "";
+                var portList = [];
+                var connect = "";
+                var line = "";
+                var incode = "";
+            
+                for(var i = 0; i < code.length; i ++) {
+                    line += code[i];
+                    if(code[i] == "#") {
+                        line = "";
+                    }
+                    if(line.search("ex ") != -1) {
+                        operation += code[i];
+                        if(code[i] == "&") {
+                            operation = operation.slice(0, operation.length - 1);
+                            operations.push(operation);
+                            operation = "";
+                        }
+                    }
+                    if(line.search("var ") != -1) {
+                        expression += code[i];
+                        if(code[i] == "&") {
+                            expression = expression.slice(0, expression.length - 1);
+                            expressions.push(expression);
+                            expression = "";
+                        }
+                    }
+                    if(line.search("VPort ") != -1) {
+                        Vport += code[i];
+                        if(code[i] == "&") {
+                            Vport = Vport.slice(0, Vport.length - 1);
+                            portList.push(Vport);
+                            Vport = "";
+                        }
+                    }
+                    if(line.search("connect ") != -1) {
+                        connect += code[i];
+                        if(code[i] == "&") {
+                            connect = connect.slice(0, connect.length - 1);
+                        }
+                    }
+                    if(line.search("%") != -1) {
+                        script += code[i];
+                        if(code[i] == "$") {
+                            script = script.replaceAll(".dsign.", "$");
+                            script = script.replaceAll(".psign.", "%");
+                            script = script.replaceAll(".scolin.", ";");
+                            script = script.replaceAll(".sharp.", "#");
+                            script = script.slice(1, script.length - 1);
+                             
+                            jsList.push(script);
+                            script = "";
+                        }
+                    }
+                }
+                for(var i = 0; i < expressions.length; i ++) {
+                    document.getElementById("serverside").innerHTML +=
+                    "var" + expressions[i] + ";";
+                }
+                for(var i = 0; i < operations.length; i ++) {
+                    document.getElementById("serverside").innerHTML += operations[i] + ";";
+               }
+                for(var i = 0; i < jsList.length; i ++) {
+                    document.getElementById("serverside").innerHTML += jsList[i];
+               }
+                for(var i = 0; i < portList.length; i ++) {
+                   incode += "document.getElementsByTagName('pre')[" + connect + "].innerHTML += " + portList[i] + ";";
+                }
+    
+                var frame = document.createElement("iframe");
+                frame.setAttribute("width", "335px");
+                frame.setAttribute("srcdoc",
+                "<pre></pre>" +
+                "<script>" +
+                document.getElementById("serverside").innerHTML +
+                incode +
+                "</" + "script>");
+            
+                document.body.appendChild(frame);
+            }
+        </script> 
+    </body>
+</html>
